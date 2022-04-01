@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery.js"></script>
+    <script src="js/client.min.js"></script>
+    <script src="js/jquery.json-viewer.js"></script>
+    <link href="css/jquery.json-viewer.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+<pre id="json-renderer"></pre>
+<script>
+    $(document).ready(function () {
+        (async () => {
+
+            let client = new ClientJS();
+
+
+
+            let jsonObj = {
+                isCanvas: client.isCanvas(),
+                levelBattery: '',
+                fps: ''
+            };
+
+            let be = Date.now();
+
+            let requestID = window.requestAnimationFrame(
+                function loop(){
+                    let now = Date.now();
+                    fps = Math.round(1000 / (now - be));
+                    be = now;
+                    requestID = requestAnimationFrame(loop);
+                    jsonObj.fps = fps;
+                    console.log(fps);
+                }
+            )
+
+            let today = new Date();
+            jsonObj.deviceSystemTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate() +' '+today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+            if (typeof navigator.getBattery === "function") {
+                const battery = await navigator.getBattery();
+                jsonObj.levelBattery = battery.level * 100 + "%";
+            }
+
+            setTimeout(function () {
+                cancelAnimationFrame(requestID);
+                $('#json-renderer').jsonViewer(jsonObj);
+            }, 200);
+        })()
+
+    });
+
+</script>
+
+</body>
+</html>
