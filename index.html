@@ -1,31 +1,36 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="js/jquery.js"></script>
-    <script src="js/client.min.js"></script>
-    <script src="js/jquery.json-viewer.js"></script>
-    <link href="css/jquery.json-viewer.css" type="text/css" rel="stylesheet">
-
+    <script src="https://sydorenkoalexander.github.io/clientjs/js/jquery.js"></script>
+    <script src="https://sydorenkoalexander.github.io/clientjs/js/client.min.js"></script>
+    <script src="https://sydorenkoalexander.github.io/clientjs/js/jquery.json-viewer.js"></script>
+    <link href="https://sydorenkoalexander.github.io/clientjs/css/jquery.json-viewer.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 <pre id="json-renderer"></pre>
+
 <script>
     $(document).ready(function () {
         (async () => {
 
             let client = new ClientJS();
 
-
-
             let jsonObj = {
                 isCanvas: client.isCanvas(),
                 levelBattery: '',
-                fps: ''
+                fps: '',
+                'gyroscope/accelerometer': false,
             };
 
             let be = Date.now();
+
+            //hennadiy
+            const endFramesCounter = 5;
+            let currentFramesCounter = 0;
+            //hennadiy
 
             let requestID = window.requestAnimationFrame(
                 function loop(){
@@ -34,7 +39,7 @@
                     be = now;
                     requestID = requestAnimationFrame(loop);
                     jsonObj.fps = fps;
-                    console.log(fps);
+                    currentFramesCounter++; //hennadiy
                 }
             )
 
@@ -46,10 +51,28 @@
                 jsonObj.levelBattery = battery.level * 100 + "%";
             }
 
-            setTimeout(function () {
-                cancelAnimationFrame(requestID);
-                $('#json-renderer').jsonViewer(jsonObj);
-            }, 200);
+            // setTimeout(function () {
+            //     cancelAnimationFrame(requestID);
+            //     $('#json-renderer').jsonViewer(jsonObj);
+            // }, 200);
+
+            //check gyroscope or accelerometer in device
+            window.addEventListener("devicemotion", (event) => {
+                if(event.acceleration.x){
+                    jsonObj['gyroscope/accelerometer'] = true;
+                }
+            });
+
+            //hennadiy
+            let interval = setInterval(() => {
+                if(currentFramesCounter === endFramesCounter){
+                    clearInterval(interval);
+                    cancelAnimationFrame(requestID);
+                    $('#json-renderer').jsonViewer(jsonObj);
+                }
+            }, 1);
+            //hennadiy
+
         })()
 
     });
